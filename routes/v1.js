@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const UserController = require('./../controllers/UserController');
-const CompanyController = require('./../controllers/CompanyController');
+const OrgController = require('./../controllers/OrgController');
 const custom = require('./../middleware/custom');
 const passport = require('passport');
 const path = require('path');
@@ -24,24 +24,24 @@ router.delete('/users', passport.authenticate('jwt', {
 
 router.post('/users/login', UserController.login);
 
-router.post('/companies', passport.authenticate('jwt', {
+router.post('/orgs', passport.authenticate('jwt', {
     session: false
-}), CompanyController.create);
+}), OrgController.create);
 
-router.get('/companies', passport.authenticate('jwt', {
+router.get('/orgs', passport.authenticate('jwt', {
     session: false
-}), CompanyController.getAll);
+}), OrgController.getAll);
 
-router.get('/companies/:company_id', passport.authenticate('jwt', {
+router.get('/orgs/:org_id', passport.authenticate('jwt', {
     session: false
-}), custom.company, CompanyController.get);
+}), custom.org, OrgController.get);
 
-router.put('/companies/:company_id', passport.authenticate('jwt', {
+router.put('/orgs/:org_id', passport.authenticate('jwt', {
     session: false
-}), custom.company, CompanyController.update);
+}), custom.org, OrgController.update);
 
-router.delete('/companies/:company_id', passport.authenticate('jwt', {
+router.delete('/orgs/:org_id', passport.authenticate('jwt', {
     session: false
-}), custom.company, CompanyController.remove);
+}), custom.org, OrgController.remove);
 
 module.exports = router;

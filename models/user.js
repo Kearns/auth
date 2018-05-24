@@ -3,7 +3,7 @@ const bcrypt_p = require('bcrypt-promise');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const validate = require('mongoose-validator');
-const Company = require('./../models/company');
+const Org = require('./../models/org');
 
 let UserSchema = mongoose.Schema({
     first: {
@@ -46,51 +46,13 @@ let UserSchema = mongoose.Schema({
 });
 
 
-UserSchema.virtual('companies', {
-    ref: 'Company',
+UserSchema.virtual('orgs', {
+    ref: 'Org',
     localField: '_id',
     foreignField: 'users.user',
     justOne: false,
 });
 
-
-UserSchema.pre('save', async function (next) {
-
-    if (this.isModified('password') || this.isNew) {
-
-        let err, salt, hash;
-        [err, salt] = await to(bcrypt.genSalt(10));
-        if (err) TE(err.message, true);
-
-        [err, hash] = await to(bcrypt.hash(this.password, salt));
-        if (err) TE(err.message, true);
-
-        this.password = hash;
-
-    } else {
-        return next();
-    }
-})
-
-UserSchema.methods.comparePassword = async function (pw) {
-    let err, pass
-    if (!this.password) TE('password not set');
-
-    [err, pass] = await to(bcrypt_p.compare(pw, this.password));
-    if (err) TE(err);
-
-    if (!pass) TE('invalid password');
-
-    return this;
-}
-UserSchema.methods.Companies = async function () {
-    let err, companies;
-    [err, companies] = await to(Company.find({
-        'users.user': this._id
-    }));
-    if (err) TE('err getting companies');
-    return companies;
-}
 UserSchema.virtual('full_name').set(function (name) {
     var split = name.split(' ');
     this.first = split[0];
@@ -104,19 +66,56 @@ UserSchema.virtual('full_name').get(function () { //now you can treat as if this
     return this.first + ' ' + this.last;
 });
 
-UserSchema.methods.getJWT = function () {
+UserSchema.pre('save', async function (next) {
+    if (this.isModified('password') || this.isNew) {
+        let err, salt, hash;
+        [err, salt] = await ProcessPromise(bcrypt.genSalt(10));
+        if (err) ThrowError(err.message, true);
+
+        [err, hash] = await ProcessPromise(bcrypt.hash(this.password, salt));
+        if (err) ThrowError(err.message, true);
+
+        this.password = hash;
+    } else {
+        return next();
+    }
+})
+
+UserSchema.method('comparePassword', async function (pw) {
+    let err, pass
+    if (!this.password) ThrowError('password not set');
+
+    [err, pass] = await ProcessPromise(bcrypt_p.compare(pw, this.password));
+
+    if (err) ThrowError(err);
+    if (!pass) ThrowError('invalid password');
+
+    return this;
+});
+
+UserSchema.method('Companies', async function () {
+    let err, orgs;
+    [err, orgs] = await ProcessPromise(Org.find({
+        'users.user': this._id
+    }));
+    if (err) ThrowError('err getting orgs');
+    return orgs;
+});
+
+UserSchema.method('getJWT', function () {
     let expiration_time = parseInt(CONFIG.jwt_expiration);
     return "Bearer " + jwt.sign({
         user_id: this._id
     }, CONFIG.jwt_encryption, {
         expiresIn: expiration_time
     });
-};
-UserSchema.methods.toWeb = function () {
+});
+
+UserSchema.method('toWeb', function () {
     let json = this.toJSON();
     json.id = this._id; //this is for the front end
     return json;
-};
+});
+
 
 let User = module.exports = mongoose.model('User', UserSchema);
-

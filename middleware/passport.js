@@ -8,7 +8,7 @@ module.exports = function (passport) {
     opts.secretOrKey = CONFIG.jwt_encryption;
     passport.use(new JwtStrategy(opts, async function (jwt_payload, done) {
         let err, user;
-        [err, user] = await to(User.findById(jwt_payload.user_id));
+        [err, user] = await ProcessPromise(User.findById(jwt_payload.user_id));
         if (err) return done(err, false);
         if (user) {
             return done(null, user);

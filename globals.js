@@ -15,40 +15,45 @@ CONFIG = {
     jwt_expiration: process.env.JWT_EXPIRATION,
 }
 
-
-to = function(promise) {
-    return promise
+ProcessPromise = promise => promise
     .then(data => {
         return [null, data];
-    }).catch(err =>
-        [pe(err)]
-    );
-}
-pe = require('parse-error');
-TE = function(err_message, log){ // TE stands for Throw Error
-    if(log === true){
+    }).catch(err => [ParseError(err)]);
+
+
+ParseError = require('parse-error');
+
+ThrowError = (err_message, log) => { // ThrowError stands for Throw Error
+    if (log === true) {
         console.error(err_message);
     }
     throw new Error(err_message);
 }
-ReError = function(res, err, code){ // Error Web Response
-    if(typeof err == 'object' && typeof err.message != 'undefined'){
+
+ReError = (res, err, code) => { // Error Web Response
+    if (typeof err == 'object' && typeof err.message != 'undefined') {
         err = err.message;
     }
-    if(typeof code !== 'undefined') res.statusCode = code;
-    return res.json({success:false, error: err});
-}
-ReSuccess = function(res, data, code){ // Success Web Response
-    let send_data = {success:true};
-    if(typeof data == 'object'){
-        send_data = Object.assign(data, send_data);//merge the objects
+    if (typeof code !== 'undefined') {
+        res.statusCode = code;
     }
-    if(typeof code !== 'undefined') res.statusCode = code;
-    return res.json(send_data)
+    return res.json({
+        success: false,
+        error: err
+    });
+}
+
+ReSuccess = (res, data = {}, code) => { // Success Web Response
+    if (typeof code !== 'undefined') {
+        res.statusCode = code;
+    }
+    return res.json({
+        success: true,
+        ...data
+    })
 };
 
-
 //This is here to handle all the uncaught promise rejections
-process.on('unhandledRejection', error => {
-    console.error('Uncaught Error', pe(error));
-});
+process.on('unhandledRejection', error =>
+    console.error('Uncaught Error', ParseError(error))
+);

@@ -17,8 +17,7 @@ app.use(bodyParser.urlencoded({
 //Passport
 app.use(passport.initialize());
 
-
-app.use(function (req, res, next) {
+app.use((req, res, next) => {
     // Website you wish to allow to connect
     res.setHeader('Access-Control-Allow-Origin', '*');
     // Request methods you wish to allow
@@ -33,7 +32,7 @@ app.use(function (req, res, next) {
 });
 
 app.use('/v1', v1);
-app.use('/', function (req, res) {
+app.use('/', (req, res) => {
     res.statusCode = 200; //send the appropriate status code
     res.json({
         status: "success",
@@ -42,15 +41,15 @@ app.use('/', function (req, res) {
     })
 });
 
-
 // catch 404 and forward to error handler
-app.use(function (req, res, next) {
+app.use((req, res, next) => {
     var err = new Error('Not Found');
     err.status = 404;
     next(err);
 });
+
 // error handler
-app.use(function (err, req, res, next) {
+app.use((err, req, res, next) => {
     // set locals, only providing error in development
     res.locals.message = err.message;
     res.locals.error = req.app.get('env') === 'development' ? err : {};
@@ -59,6 +58,6 @@ app.use(function (err, req, res, next) {
     res.render('error');
 });
 
-
 app.listen(3000, () => console.log('Example app listening on port 3000!'))
+
 module.exports = app;

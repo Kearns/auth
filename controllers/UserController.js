@@ -1,7 +1,7 @@
 const User = require('../models').User;
 const authService = require('./../services/AuthService');
 
-const create = async function (req, res) {
+const create = async (req, res) => {
 
     res.setHeader('Content-Type', 'application/json');
     const body = req.body;
@@ -13,7 +13,7 @@ const create = async function (req, res) {
     } else {
         let err, user;
 
-        [err, user] = await to(authService.createUser(body));
+        [err, user] = await ProcessPromise(authService.createUser(body));
 
         if (err) return ReError(res, err, 422);
         return ReSuccess(res, {
@@ -25,7 +25,7 @@ const create = async function (req, res) {
 }
 
 
-const get = async function (req, res) {
+const get = async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     let user = req.user;
 
@@ -35,13 +35,13 @@ const get = async function (req, res) {
 }
 
 
-const update = async function (req, res) {
+const update = async (req, res) => {
     let err, user, data
     user = req.user;
     data = req.body;
     user.set(data);
 
-    [err, user] = await to(user.save());
+    [err, user] = await ProcessPromise(user.save());
     if (err) {
         console.log(err, user);
 
@@ -63,11 +63,11 @@ const update = async function (req, res) {
 }
 
 
-const remove = async function (req, res) {
+const remove = async (req, res) => {
     let user, err;
     user = req.user;
 
-    [err, user] = await to(user.destroy());
+    [err, user] = await ProcessPromise(user.destroy());
     if (err) return ReError(res, 'error occured trying to delete user');
 
     return ReSuccess(res, {
@@ -76,11 +76,11 @@ const remove = async function (req, res) {
 }
 
 
-const login = async function (req, res) {
+const login = async (req, res) => {
     const body = req.body;
     let err, user;
 
-    [err, user] = await to(authService.authUser(req.body));
+    [err, user] = await ProcessPromise(authService.authUser(req.body));
     if (err) return ReError(res, err, 422);
 
     return ReSuccess(res, {

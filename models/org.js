@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-let CompanySchema = mongoose.Schema({
+let OrgSchema = mongoose.Schema({
     name: {
         type: String
     },
@@ -16,9 +16,11 @@ let CompanySchema = mongoose.Schema({
 }, {
     timestamps: true
 });
-CompanySchema.methods.toWeb = function () {
+
+OrgSchema.method('toWeb', function () {
     let json = this.toJSON();
     json.id = this._id; //this is for the front end
     return json;
-};
-let company = module.exports = mongoose.model('Company', CompanySchema);
+});
+
+let org = module.exports = mongoose.model('Org', OrgSchema);
