@@ -1,7 +1,7 @@
-/* Global Variables */
-require('./config/config');
-require('./global_functions');
+/* Global Variables & funcs */
+require('./globals');
 /*----------------------------------------------*/
+
 const express = require('express');
 const logger = require('morgan');
 const bodyParser = require('body-parser');
